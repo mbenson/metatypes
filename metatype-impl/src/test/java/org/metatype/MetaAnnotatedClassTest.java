@@ -15,18 +15,16 @@
  */
 package org.metatype;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import junit.framework.TestCase;
-
 import javax.annotation.Metatype;
+
+import junit.framework.TestCase;
 
 /**
  * Basic assertions:
@@ -42,7 +40,7 @@ public class MetaAnnotatedClassTest extends TestCase {
     public void test() throws Exception {
 
         { // Circle
-            final java.lang.reflect.AnnotatedElement annotated = new MetaAnnotatedClass(Circle.class);
+            final java.lang.reflect.AnnotatedElement annotated = new MetaAnnotatedClass<Circle>(Circle.class);
             assertNotNull(annotated);
 
             assertTrue(annotated.isAnnotationPresent(Color.class));
@@ -53,7 +51,7 @@ public class MetaAnnotatedClassTest extends TestCase {
         }
 
         { // Triangle
-            final java.lang.reflect.AnnotatedElement annotated = new MetaAnnotatedClass(Triangle.class);
+            final java.lang.reflect.AnnotatedElement annotated = new MetaAnnotatedClass<Triangle>(Triangle.class);
             assertNotNull(annotated);
 
             assertTrue(annotated.isAnnotationPresent(Color.class));
@@ -74,7 +72,7 @@ public class MetaAnnotatedClassTest extends TestCase {
         }
 
         { // Circular - Egg wins
-            final java.lang.reflect.AnnotatedElement annotated  = new MetaAnnotatedClass(Store.class);
+            final java.lang.reflect.AnnotatedElement annotated  = new MetaAnnotatedClass<Store>(Store.class);
             assertNotNull(annotated);
 
             assertTrue(annotated.isAnnotationPresent(Color.class));
@@ -95,7 +93,7 @@ public class MetaAnnotatedClassTest extends TestCase {
         }
 
         { // Circular - Chicken wins
-            final java.lang.reflect.AnnotatedElement annotated  = new MetaAnnotatedClass(Farm.class);
+            final java.lang.reflect.AnnotatedElement annotated  = new MetaAnnotatedClass<Farm>(Farm.class);
             assertNotNull(annotated);
 
             assertTrue(annotated.isAnnotationPresent(Color.class));
@@ -116,7 +114,7 @@ public class MetaAnnotatedClassTest extends TestCase {
         }
 
         { // None
-            final java.lang.reflect.AnnotatedElement annotated  = new MetaAnnotatedClass(None.class);
+            final java.lang.reflect.AnnotatedElement annotated  = new MetaAnnotatedClass<None>(None.class);
             assertNotNull(annotated);
 
             assertFalse(annotated.isAnnotationPresent(NotMeta.class));
@@ -132,7 +130,7 @@ public class MetaAnnotatedClassTest extends TestCase {
 
     public void testFake() {
         // Fake - annotated, but not meta-annotated
-        final java.lang.reflect.AnnotatedElement annotated  = new MetaAnnotatedClass(Fake.class);
+        final java.lang.reflect.AnnotatedElement annotated  = new MetaAnnotatedClass<Fake>(Fake.class);
         assertNotNull(annotated);
 
         assertTrue(annotated.isAnnotationPresent(NotMeta.class));
@@ -148,7 +146,7 @@ public class MetaAnnotatedClassTest extends TestCase {
 
     public void testSquare() {
         // Square
-        final java.lang.reflect.AnnotatedElement annotated  = new MetaAnnotatedClass(Square.class);
+        final java.lang.reflect.AnnotatedElement annotated  = new MetaAnnotatedClass<Square>(Square.class);
         assertNotNull(annotated);
 
         assertTrue(annotated.isAnnotationPresent(Color.class));

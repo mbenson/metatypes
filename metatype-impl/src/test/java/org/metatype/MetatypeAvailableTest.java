@@ -39,6 +39,7 @@ public class MetatypeAvailableTest extends TestCase {
 
     public void testSquare() {
         // Square
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         final java.lang.reflect.AnnotatedElement annotated  = new MetaAnnotatedClass(Square.class);
         assertNotNull(annotated);
 

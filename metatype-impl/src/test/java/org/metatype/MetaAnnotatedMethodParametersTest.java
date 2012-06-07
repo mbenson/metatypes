@@ -15,21 +15,19 @@
  */
 package org.metatype;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import javax.annotation.Metatype;
+
+import junit.framework.TestCase;
 
 /**
  * @author David Blevins
@@ -43,6 +41,7 @@ public class MetaAnnotatedMethodParametersTest extends TestCase {
         final Map<String, Annotated<Method>> map = new HashMap<String, Annotated<Method>>();
 
         for (Class<?> clazz : classes) {
+            @SuppressWarnings({ "unchecked", "rawtypes" })
             final MetaAnnotatedClass<?> annotatedClass = new MetaAnnotatedClass(clazz);
 
             for (MetaAnnotatedMethod method : annotatedClass.getMethods()) {
@@ -121,6 +120,7 @@ public class MetaAnnotatedMethodParametersTest extends TestCase {
         return method.getParameterAnnotations()[0];
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends Annotation> T get(Class<T> type, Annotation[] annotations) {
         for (Annotation annotation : annotations) {
             if (annotation.annotationType() == type) return (T) annotation;
