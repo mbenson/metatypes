@@ -55,8 +55,9 @@ public abstract class MetaAnnotatedObject<T> implements MetaAnnotated<T> {
         return annotations.containsKey(annotationClass);
     }
 
-    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-        MetaAnnotation<T> annotation = (MetaAnnotation<T>) annotations.get(annotationClass);
+    public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
+        @SuppressWarnings("unchecked")
+		MetaAnnotation<A> annotation = (MetaAnnotation<A>) annotations.get(annotationClass);
         return (annotation == null) ? null : annotation.get();
     }
 
@@ -64,7 +65,7 @@ public abstract class MetaAnnotatedObject<T> implements MetaAnnotated<T> {
         Annotation[] annotations = new Annotation[this.annotations.size()];
 
         int i = 0;
-        for (MetaAnnotation annotation : this.annotations.values()) {
+        for (MetaAnnotation<?> annotation : this.annotations.values()) {
             annotations[i++] = annotation.get();
         }
 
@@ -97,48 +98,49 @@ public abstract class MetaAnnotatedObject<T> implements MetaAnnotated<T> {
         for (Annotation annotation : getDeclaredMetaAnnotations(clazz)) {
             Class<? extends Annotation> type = annotation.annotationType();
 
-            MetaAnnotation existing = found.get(type);
+            final MetaAnnotation<?> existing = found.get(type);
 
-            if (existing != null) {
+            if (existing != null && existing.getDepth() < depth) {
 
-                if (existing.getDepth() > depth) {
+            	// IGNORE, what we have already is higher priority
 
-                    // OVERWRITE
+            	continue;
+            }
 
-                    found.put(type, new MetaAnnotation(annotation, depth));
+            final MetaAnnotation<?> metaAnnotation = new MetaAnnotation<Annotation>(annotation, depth);
 
-                    unroll(type, depth + 1, found);
+            if (existing == null || existing.getDepth() > depth) {
 
-                } else if (existing.getDepth() < depth) {
+            	// ADD / OVERWRITE
 
-                    // IGNORE
+            	found.put(type, metaAnnotation);
 
-                    // ignore, what we have already is higher priority
-
-                } else {
-
-                    // CONFLICT
-
-                    // They are the same depth and therefore conflicting
-                    existing.getConflicts().add(new MetaAnnotation(annotation, depth));
-
-                }
+            	unroll(type, depth + 1, found);
 
             } else {
+            	
+            	// CONFLICT
+            	
+            	// They are the same depth and therefore conflicting
 
-                // NEW
-
-                found.put(type, new MetaAnnotation(annotation, depth));
-
-                unroll(type, depth + 1, found);
+            	addTo(existing.getConflicts(), metaAnnotation);
 
             }
+
         }
+    }
+
+    /*
+     * Narrow scope of suppressed warnings:
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	private static boolean addTo(List conflictsList, MetaAnnotation annotation) {
+    	return conflictsList.add(annotation);
     }
 
     private static Collection<Annotation> getDeclaredMetaAnnotations(Class<? extends Annotation> clazz) {
 
-        Map<Class, Annotation> map = new HashMap<Class, Annotation>();
+        Map<Class<? extends Annotation>, Annotation> map = new HashMap<Class<? extends Annotation>, Annotation>();
 
         // pull in the annotations declared on this annotation
 
@@ -165,7 +167,7 @@ public abstract class MetaAnnotatedObject<T> implements MetaAnnotated<T> {
                     }
                 }
 
-                for (Constructor constructor : def.getDeclaredConstructors()) {
+                for (Constructor<?> constructor : def.getDeclaredConstructors()) {
                     for (Annotation[] array : constructor.getParameterAnnotations()) {
                         groups.add(array);
                     }
@@ -234,6 +236,7 @@ public abstract class MetaAnnotatedObject<T> implements MetaAnnotated<T> {
         return false;
     }
 
+    //TODO use or delete
     private static boolean validTarget(Class<? extends Annotation> type) {
         final Target target = type.getAnnotation(Target.class);
 
@@ -253,7 +256,7 @@ public abstract class MetaAnnotatedObject<T> implements MetaAnnotated<T> {
 
         for (Annotation annotation : annotations) {
 
-            map.put(annotation.annotationType(), new MetaAnnotation(annotation, 0));
+            map.put(annotation.annotationType(), new MetaAnnotation<Annotation>(annotation, 0));
 
             unroll(annotation.annotationType(), 1, map);
 
