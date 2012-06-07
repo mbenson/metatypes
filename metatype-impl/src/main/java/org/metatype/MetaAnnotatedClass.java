@@ -38,16 +38,16 @@ public class MetaAnnotatedClass<T> extends MetaAnnotatedObject<Class<T>> {
         return target.getDeclaredAnnotations();
     }
 
-    public MetaAnnotatedClass<?> forName(String className) throws ClassNotFoundException {
-        return to(target.forName(className));
+    public static MetaAnnotatedClass<?> forName(String className) throws ClassNotFoundException {
+        return to(Class.forName(className));
     }
 
-    private MetaAnnotatedClass<?> to(Class<?> clazz) {
-        return new MetaAnnotatedClass(clazz);
+    private static <T> MetaAnnotatedClass<T> to(Class<T> clazz) {
+        return new MetaAnnotatedClass<T>(clazz);
     }
 
-    public MetaAnnotatedClass<?> forName(String name, boolean initialize, ClassLoader loader) throws ClassNotFoundException {
-        return to(target.forName(name, initialize, loader));
+    public static MetaAnnotatedClass<?> forName(String name, boolean initialize, ClassLoader loader) throws ClassNotFoundException {
+        return to(Class.forName(name, initialize, loader));
     }
 
     public T newInstance() throws InstantiationException, IllegalAccessException {
@@ -94,6 +94,7 @@ public class MetaAnnotatedClass<T> extends MetaAnnotatedObject<Class<T>> {
         return target.getTypeParameters();
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public MetaAnnotatedClass<? super T> getSuperclass() {
         return new MetaAnnotatedClass(target.getSuperclass());
     }
@@ -187,7 +188,7 @@ public class MetaAnnotatedClass<T> extends MetaAnnotatedObject<Class<T>> {
     }
 
     public MetaAnnotatedConstructor<T> getConstructor(Class<?>... parameterTypes) throws NoSuchMethodException, SecurityException {
-        return new MetaAnnotatedConstructor(target.getConstructor(parameterTypes));
+        return new MetaAnnotatedConstructor<T>(target.getConstructor(parameterTypes));
     }
 
     public MetaAnnotatedClass<?>[] getDeclaredClasses() throws SecurityException {
@@ -215,7 +216,7 @@ public class MetaAnnotatedClass<T> extends MetaAnnotatedObject<Class<T>> {
     }
 
     public MetaAnnotatedConstructor<T> getDeclaredConstructor(Class<?>... parameterTypes) throws NoSuchMethodException, SecurityException {
-        return new MetaAnnotatedConstructor(target.getDeclaredConstructor(parameterTypes));
+        return new MetaAnnotatedConstructor<T>(target.getDeclaredConstructor(parameterTypes));
     }
 
     public InputStream getResourceAsStream(String name) {
@@ -250,7 +251,7 @@ public class MetaAnnotatedClass<T> extends MetaAnnotatedObject<Class<T>> {
         return target.asSubclass(clazz);
     }
 
-    private MetaAnnotatedMethod[] to(Method[] a) {
+    private static MetaAnnotatedMethod[] to(Method[] a) {
         MetaAnnotatedMethod[] b = new MetaAnnotatedMethod[a.length];
         for (int i = 0; i < a.length; i++) {
             b[i] = new MetaAnnotatedMethod(a[i]);
@@ -258,11 +259,12 @@ public class MetaAnnotatedClass<T> extends MetaAnnotatedObject<Class<T>> {
         return b;
     }
 
-    private MetaAnnotatedMethod to(Method method) {
+    private static MetaAnnotatedMethod to(Method method) {
         return new MetaAnnotatedMethod(method);
     }
 
-    private MetaAnnotatedConstructor<?>[] to(Constructor<?>[] a) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static MetaAnnotatedConstructor<?>[] to(Constructor<?>[] a) {
         MetaAnnotatedConstructor<?>[] b = new MetaAnnotatedConstructor[a.length];
         for (int i = 0; i < a.length; i++) {
             b[i] = new MetaAnnotatedConstructor(a[i]);
@@ -270,8 +272,8 @@ public class MetaAnnotatedClass<T> extends MetaAnnotatedObject<Class<T>> {
         return b;
     }
 
-    private MetaAnnotatedConstructor<?> to(Constructor<?> constructor) {
-        return new MetaAnnotatedConstructor(constructor);
+    private static <T> MetaAnnotatedConstructor<T> to(Constructor<T> constructor) {
+        return new MetaAnnotatedConstructor<T>(constructor);
     }
 
     private MetaAnnotatedClass<?>[] to(Class<?>[] a) {
