@@ -118,9 +118,9 @@ public abstract class MetaAnnotatedObject<T> implements MetaAnnotated<T> {
                 unroll(type, depth + 1, found);
 
             } else {
-                
+
                 // CONFLICT
-                
+
                 // They are the same depth and therefore conflicting
 
                 addTo(existing.getConflicts(), metaAnnotation);
