@@ -57,7 +57,7 @@ public abstract class MetaAnnotatedObject<T> implements MetaAnnotated<T> {
 
     public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
         @SuppressWarnings("unchecked")
-		MetaAnnotation<A> annotation = (MetaAnnotation<A>) annotations.get(annotationClass);
+        MetaAnnotation<A> annotation = (MetaAnnotation<A>) annotations.get(annotationClass);
         return (annotation == null) ? null : annotation.get();
     }
 
@@ -102,28 +102,28 @@ public abstract class MetaAnnotatedObject<T> implements MetaAnnotated<T> {
 
             if (existing != null && existing.getDepth() < depth) {
 
-            	// IGNORE, what we have already is higher priority
+                // IGNORE, what we have already is higher priority
 
-            	continue;
+                continue;
             }
 
             final MetaAnnotation<?> metaAnnotation = new MetaAnnotation<Annotation>(annotation, depth);
 
             if (existing == null || existing.getDepth() > depth) {
 
-            	// ADD / OVERWRITE
+                // ADD / OVERWRITE
 
-            	found.put(type, metaAnnotation);
+                found.put(type, metaAnnotation);
 
-            	unroll(type, depth + 1, found);
+                unroll(type, depth + 1, found);
 
             } else {
-            	
-            	// CONFLICT
-            	
-            	// They are the same depth and therefore conflicting
+                
+                // CONFLICT
+                
+                // They are the same depth and therefore conflicting
 
-            	addTo(existing.getConflicts(), metaAnnotation);
+                addTo(existing.getConflicts(), metaAnnotation);
 
             }
 
@@ -134,8 +134,8 @@ public abstract class MetaAnnotatedObject<T> implements MetaAnnotated<T> {
      * Narrow scope of suppressed warnings:
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-	private static boolean addTo(List conflictsList, MetaAnnotation annotation) {
-    	return conflictsList.add(annotation);
+    private static boolean addTo(List conflictsList, MetaAnnotation annotation) {
+        return conflictsList.add(annotation);
     }
 
     private static Collection<Annotation> getDeclaredMetaAnnotations(Class<? extends Annotation> clazz) {
