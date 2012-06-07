@@ -15,38 +15,38 @@
  */
 package org.metatype;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import javax.annotation.Metatype;
+
+import junit.framework.TestCase;
 
 /**
  * @author David Blevins
  */
 public class MetaAnnotatedConstructorTest extends TestCase {
 
+    @SuppressWarnings("unchecked")
     public void test() throws Exception {
 
         final Class<?>[] classes = new Class[]{Square.class, Circle.class, Triangle.class, Oval.class, Store.class, Farm.class, None.class};
 
-        final Map<String, Annotated<Constructor>> map = new HashMap<String, Annotated<Constructor>>();
+        final Map<String, Annotated<Constructor<?>>> map = new HashMap<String, Annotated<Constructor<?>>>();
 
         for (Class<?> clazz : classes) {
+            @SuppressWarnings("rawtypes")
             final MetaAnnotatedClass<?> annotatedClass = new MetaAnnotatedClass(clazz);
 
-            for (MetaAnnotatedConstructor constructor : annotatedClass.getConstructors()) {
+            for (@SuppressWarnings("rawtypes") MetaAnnotatedConstructor constructor : annotatedClass.getConstructors()) {
                 map.put(annotatedClass.getSimpleName().toLowerCase(), constructor);
             }
         }

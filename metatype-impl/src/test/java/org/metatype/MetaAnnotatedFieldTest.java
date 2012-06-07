@@ -15,25 +15,24 @@
  */
 package org.metatype;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import javax.annotation.Metatype;
+
+import junit.framework.TestCase;
 
 /**
  * @author David Blevins
  */
+@SuppressWarnings("unused")
 public class MetaAnnotatedFieldTest extends TestCase {
 
     public void test() throws Exception {
@@ -43,6 +42,7 @@ public class MetaAnnotatedFieldTest extends TestCase {
         final Map<String, Annotated<Field>> map = new HashMap<String, Annotated<Field>>();
 
         for (Class<?> clazz : classes) {
+            @SuppressWarnings({ "unchecked", "rawtypes" })
             final MetaAnnotatedClass<?> annotatedClass = new MetaAnnotatedClass(clazz);
 
             for (MetaAnnotatedField field : annotatedClass.getDeclaredFields()) {
