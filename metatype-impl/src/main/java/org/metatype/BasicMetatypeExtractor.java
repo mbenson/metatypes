@@ -37,7 +37,7 @@ import javax.annotation.MetatypeExtractor;
 /**
  * Basic {@link MetatypeExtractor} implementation.
  *
- * @author mbenson
+ * @author David Blevins
  */
 public class BasicMetatypeExtractor implements MetatypeExtractor<Annotation> {
 
