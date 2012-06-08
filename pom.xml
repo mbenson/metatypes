@@ -33,6 +33,7 @@
     <module>metatype-api</module>
     <module>metatype-impl</module>
     <module>metatype-ejb</module>
+    <module>metatype-override</module>
   </modules>
 
   <dependencyManagement>
