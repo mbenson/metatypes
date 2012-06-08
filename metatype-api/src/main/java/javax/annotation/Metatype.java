@@ -24,4 +24,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.ANNOTATION_TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Metatype {
+    /**
+     * Class used to unroll a particular {@link Metatype}.
+     * @return Class<? extends MetatypeExtractor>
+     */
+    Class<? extends MetatypeExtractor<?>> extractUsing() default DefaultMetatypeExtractor.class;
 }

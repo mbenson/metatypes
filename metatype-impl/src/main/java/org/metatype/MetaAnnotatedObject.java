@@ -15,25 +15,19 @@
  */
 package org.metatype;
 
-import javax.annotation.Metaroot;
-import javax.annotation.Metatype;
-
-import static java.util.Arrays.asList;
-
 import java.lang.annotation.Annotation;
-import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Metaroot;
+import javax.annotation.Metatype;
+import javax.annotation.MetatypeExtractor;
 
 /**
  * @author David Blevins
@@ -92,11 +86,10 @@ public abstract class MetaAnnotatedObject<T> implements MetaAnnotated<T> {
     }
 
 
-    private static void unroll(Class<? extends Annotation> clazz, int depth, Map<Class<? extends Annotation>, MetaAnnotation<?>> found) {
-        if (!isMetaAnnotation(clazz)) return;
+    private static <A extends Annotation> void unroll(A source, int depth, Map<Class<? extends Annotation>, MetaAnnotation<?>> found) {
 
-        for (Annotation annotation : getDeclaredMetaAnnotations(clazz)) {
-            Class<? extends Annotation> type = annotation.annotationType();
+        for (Annotation annotation : extractFrom(source)) {
+            final Class<? extends Annotation> type = annotation.annotationType();
 
             final MetaAnnotation<?> existing = found.get(type);
 
@@ -115,7 +108,7 @@ public abstract class MetaAnnotatedObject<T> implements MetaAnnotated<T> {
 
                 found.put(type, metaAnnotation);
 
-                unroll(type, depth + 1, found);
+                unroll(annotation, depth + 1, found);
 
             } else {
 
@@ -138,95 +131,40 @@ public abstract class MetaAnnotatedObject<T> implements MetaAnnotated<T> {
         return conflictsList.add(annotation);
     }
 
-    private static Collection<Annotation> getDeclaredMetaAnnotations(Class<? extends Annotation> clazz) {
-
-        Map<Class<? extends Annotation>, Annotation> map = new HashMap<Class<? extends Annotation>, Annotation>();
-
-        // pull in the annotations declared on this annotation
-
-        for (Annotation annotation : clazz.getDeclaredAnnotations()) {
-            map.put(annotation.annotationType(), annotation);
+    private static <A extends Annotation> Collection<Annotation> extractFrom(A annotation) {
+        final Annotation metaAnnotation = getMetaRoot(annotation.annotationType());
+        if (metaAnnotation == null) {
+            return Collections.<Annotation> emptySet();
         }
-
-        List<Annotation[]> groups = new ArrayList<Annotation[]>();
-
-        Class<? extends Annotation> metatype = getMetatype(clazz);
-        if (metatype != null) {
-            try {
-                Class<?> def = clazz.getClassLoader().loadClass(clazz.getName() + "$$");
-
-                List<AnnotatedElement> elements = new ArrayList<AnnotatedElement>();
-
-                elements.addAll(asList(def.getDeclaredFields()));
-                elements.addAll(asList(def.getDeclaredConstructors()));
-                elements.addAll(asList(def.getDeclaredMethods()));
-
-                for (Method method : def.getDeclaredMethods()) {
-                    for (Annotation[] array : method.getParameterAnnotations()) {
-                        groups.add(array);
-                    }
-                }
-
-                for (Constructor<?> constructor : def.getDeclaredConstructors()) {
-                    for (Annotation[] array : constructor.getParameterAnnotations()) {
-                        groups.add(array);
-                    }
-                }
-
-                for (AnnotatedElement element : elements) {
-                    groups.add(element.getDeclaredAnnotations());
-                }
-
-                for (Annotation[] annotations : groups) {
-                    if (contains(annotations, clazz)) {
-                        for (Annotation annotation : annotations) {
-                            map.put(annotation.annotationType(), annotation);
-                        }
-                    }
-                }
-            } catch (ClassNotFoundException e) {
-                // inner class is optional
-            }
+        final MetatypeExtractor<? super A> extractor;
+        if (metaAnnotation.annotationType().equals(Metatype.class)) {
+            extractor = newInstance(((Metatype) metaAnnotation).extractUsing());
+        } else {
+            extractor = new BasicMetatypeExtractor();
         }
-
-        // TODO: why not? maybe ignore all annotations that are not applicable
-        map.remove(Target.class);
-        map.remove(Retention.class);
-        map.remove(Documented.class);
-        // if the chicken is an egg, carry it forward
-        if (!isMetaAnnotation(metatype))
-            map.remove(metatype);
-        map.remove(clazz);
-
-        return map.values();
+        return extractor.extractAnnotations(annotation);
     }
 
-    private static boolean contains(Annotation[] annotations, Class<? extends Annotation> clazz) {
-        for (Annotation annotation : annotations) {
-            if (clazz.equals(annotation.annotationType())) return true;
+    @SuppressWarnings("unchecked")
+    private static <A extends Annotation> MetatypeExtractor<A> newInstance(
+            @SuppressWarnings("rawtypes") Class<? extends MetatypeExtractor> extractorType) {
+        try {
+            return extractorType.newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("metadata exception", e);
         }
-        return false;
     }
 
-    private static Class<? extends Annotation> getMetatype(Class<? extends Annotation> clazz) {
+    private static Annotation getMetaRoot(Class<? extends Annotation> clazz) {
         for (Annotation annotation : clazz.getDeclaredAnnotations()) {
-            Class<? extends Annotation> type = annotation.annotationType();
-
-            if (isMetatypeAnnotation(type)) return type;
+            if (isMetatypeAnnotation(annotation.annotationType())) return annotation;
         }
 
         return null;
     }
 
-    private static boolean isMetaAnnotation(Class<? extends Annotation> clazz) {
-        for (Annotation annotation : clazz.getDeclaredAnnotations()) {
-            if (isMetatypeAnnotation(annotation.annotationType())) return true;
-        }
-
-        return false;
-    }
-
     private static boolean isMetatypeAnnotation(Class<? extends Annotation> type) {
+        // shortcut for the common case:
         if (Metatype.class.equals(type)) return true;
 
         for (Annotation annotation : type.getAnnotations()) {
@@ -258,7 +196,7 @@ public abstract class MetaAnnotatedObject<T> implements MetaAnnotated<T> {
 
             map.put(annotation.annotationType(), new MetaAnnotation<Annotation>(annotation, 0));
 
-            unroll(annotation.annotationType(), 1, map);
+            unroll(annotation, 1, map);
 
         }
 
