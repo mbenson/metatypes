@@ -36,6 +36,7 @@ public abstract class AnnotationOverrider<A extends Annotation, M extends Annota
         extends AnnotationConfigurer<A> {
     private final Class<M> overridingType;
 
+    // snapins:
     private A overridden;
     private M overriding;
 
@@ -72,4 +73,10 @@ public abstract class AnnotationOverrider<A extends Annotation, M extends Annota
      * @param overriding
      */
     protected abstract void override(A result, A overridden, M overriding);
+
+    final boolean supports(Class<? extends Annotation> overriddenType,
+            Class<? extends Annotation> overridingType) {
+        return overriddenType.equals(getStubType())
+                && overridingType.equals(this.overridingType);
+    }
 }

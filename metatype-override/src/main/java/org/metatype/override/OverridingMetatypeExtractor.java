@@ -28,6 +28,9 @@ public abstract class OverridingMetatypeExtractor extends
         DefaultMetatypeExtractor {
     private final AnnotationOverrider<?, ?>[] overriders;
 
+    /**
+     * @param overriders in ascending priority (last runs last)
+     */
     protected OverridingMetatypeExtractor(
             AnnotationOverrider<?, ?>... overriders) {
         this.overriders = overriders == null ? new AnnotationOverrider[] {}
@@ -50,12 +53,14 @@ public abstract class OverridingMetatypeExtractor extends
         return result;
     }
 
+    @SuppressWarnings("unchecked")
     private <A extends Annotation, M extends Annotation> A override(A servant,
             M master) {
         A result = servant;
         for (AnnotationOverrider<?, ?> overrider : overriders) {
-            //TODO check applicability and run
-
+            if (overrider.supports(servant.annotationType(), master.annotationType())) {
+                result = ((AnnotationOverrider<A, M>) overrider).override(servant, master);
+            }
         }
         return result;
     }
