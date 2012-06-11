@@ -132,7 +132,7 @@ public abstract class MetaAnnotatedObject<T> implements MetaAnnotated<T> {
     }
 
     private static <A extends Annotation> Collection<Annotation> extractFrom(A annotation) {
-        final Annotation metaAnnotation = getMetaRoot(annotation.annotationType());
+        final Annotation metaAnnotation = getMetatype(annotation.annotationType());
         if (metaAnnotation == null) {
             return Collections.<Annotation> emptySet();
         }
@@ -155,7 +155,7 @@ public abstract class MetaAnnotatedObject<T> implements MetaAnnotated<T> {
         }
     }
 
-    private static Annotation getMetaRoot(Class<? extends Annotation> clazz) {
+    private static Annotation getMetatype(Class<? extends Annotation> clazz) {
         for (Annotation annotation : clazz.getDeclaredAnnotations()) {
             if (isMetatypeAnnotation(annotation.annotationType())) return annotation;
         }
