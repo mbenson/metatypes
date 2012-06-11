@@ -39,12 +39,14 @@ import java.util.Map;
  * @author David Blevins
  */
 public abstract class MetaAnnotatedObject<T> implements MetaAnnotated<T> {
-    protected final Map<Class<? extends Annotation>, MetaAnnotation<?>> annotations = new HashMap<Class<? extends Annotation>, MetaAnnotation<?>>();
     protected final T target;
+
+    private final Map<Class<? extends Annotation>, MetaAnnotation<?>> annotations;
 
     MetaAnnotatedObject(T target, Map<Class<? extends Annotation>, MetaAnnotation<?>> annotations) {
         this.target = target;
-        this.annotations.putAll(annotations);
+        this.annotations = annotations.isEmpty() ? Collections.<Class<? extends Annotation>, MetaAnnotation<?>> emptyMap() : Collections
+                .unmodifiableMap(new HashMap<Class<? extends Annotation>, MetaAnnotation<?>>(annotations));
     }
 
     public T get() {
@@ -73,7 +75,7 @@ public abstract class MetaAnnotatedObject<T> implements MetaAnnotated<T> {
     }
 
     public Collection<MetaAnnotation<?>> getMetaAnnotations() {
-        return Collections.unmodifiableCollection(annotations.values());
+        return annotations.values();
     }
 
     @Override
