@@ -24,16 +24,15 @@ import org.apache.commons.proxy2.stub.AnnotationFactory;
 
 /**
  * Overrides an annotation.
- *
+ * 
  * @author mbenson
- *
+ * 
  * @param <A>
  *            overridden type
  * @param <M>
  *            overriding type
  */
-public abstract class AnnotationOverrider<A extends Annotation, M extends Annotation>
-        extends AnnotationConfigurer<A> {
+public abstract class AnnotationOverrider<A extends Annotation, M extends Annotation> extends AnnotationConfigurer<A> {
     private final Class<M> overridingType;
 
     // snapins:
@@ -42,10 +41,8 @@ public abstract class AnnotationOverrider<A extends Annotation, M extends Annota
 
     @SuppressWarnings("unchecked")
     protected AnnotationOverrider() {
-        overridingType = (Class<M>) TypeUtils.getRawType(
-                AnnotationOverrider.class.getTypeParameters()[1], getClass());
-        Validate.validState(overridingType != null,
-                "Overriding type must be fully specified");
+        overridingType = (Class<M>) TypeUtils.getRawType(AnnotationOverrider.class.getTypeParameters()[1], getClass());
+        Validate.validState(overridingType != null, "Overriding type must be fully specified");
     }
 
     final synchronized A override(A overridden, M overriding) {
@@ -67,16 +64,14 @@ public abstract class AnnotationOverrider<A extends Annotation, M extends Annota
 
     /**
      * Override implementation.
-     *
+     * 
      * @param result
      * @param overridden
      * @param overriding
      */
     protected abstract void override(A result, A overridden, M overriding);
 
-    final boolean supports(Class<? extends Annotation> overriddenType,
-            Class<? extends Annotation> overridingType) {
-        return overriddenType.equals(getStubType())
-                && overridingType.equals(this.overridingType);
+    final boolean supports(Class<? extends Annotation> overriddenType, Class<? extends Annotation> overridingType) {
+        return overriddenType.equals(getStubType()) && overridingType.equals(this.overridingType);
     }
 }

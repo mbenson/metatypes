@@ -28,8 +28,7 @@ import org.apache.commons.lang3.AnnotationUtils;
 /**
  * {@link MetatypeExtractor} with typesafe override feature.
  */
-public abstract class OverridingMetatypeExtractor<A extends Annotation>
-        implements MetatypeExtractor<A> {
+public abstract class OverridingMetatypeExtractor<A extends Annotation> implements MetatypeExtractor<A> {
     private static final DefaultMetatypeExtractor DEFAULT_METATYPE_EXTRACTOR = new DefaultMetatypeExtractor();
 
     private final AnnotationOverrider<?, ?>[] overriders;
@@ -38,17 +37,14 @@ public abstract class OverridingMetatypeExtractor<A extends Annotation>
      * @param overriders
      *            in ascending priority (last runs last)
      */
-    protected OverridingMetatypeExtractor(
-            AnnotationOverrider<?, ?>... overriders) {
-        this.overriders = overriders == null ? new AnnotationOverrider[] {}
-                : overriders;
+    protected OverridingMetatypeExtractor(AnnotationOverrider<?, ?>... overriders) {
+        this.overriders = overriders == null ? new AnnotationOverrider[] {} : overriders;
     }
 
     @Override
     public final Collection<Annotation> extractAnnotations(A annotation) {
         // ensure a modifiable list:
-        final ArrayList<Annotation> result = new ArrayList<Annotation>(
-                DEFAULT_METATYPE_EXTRACTOR.extractAnnotations(annotation));
+        final ArrayList<Annotation> result = new ArrayList<Annotation>(DEFAULT_METATYPE_EXTRACTOR.extractAnnotations(annotation));
         final ListIterator<Annotation> iter = result.listIterator();
         while (iter.hasNext()) {
             Annotation toOverride = iter.next();
@@ -64,10 +60,8 @@ public abstract class OverridingMetatypeExtractor<A extends Annotation>
     private <S extends Annotation> S override(S servant, A master) {
         S result = servant;
         for (AnnotationOverrider<?, ?> overrider : overriders) {
-            if (overrider.supports(servant.annotationType(),
-                    master.annotationType())) {
-                result = ((AnnotationOverrider<S, A>) overrider).override(
-                        servant, master);
+            if (overrider.supports(servant.annotationType(), master.annotationType())) {
+                result = ((AnnotationOverrider<S, A>) overrider).override(servant, master);
             }
         }
         return result;
