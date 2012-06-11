@@ -21,15 +21,22 @@ import java.util.Collection;
 import java.util.ListIterator;
 
 import javax.annotation.DefaultMetatypeExtractor;
+import javax.annotation.MetatypeExtractor;
 
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.AnnotationUtils;
 
-public abstract class OverridingMetatypeExtractor extends
-        DefaultMetatypeExtractor {
+/**
+ * {@link MetatypeExtractor} with typesafe override feature.
+ */
+public abstract class OverridingMetatypeExtractor<A extends Annotation>
+        implements MetatypeExtractor<A> {
+    private static final DefaultMetatypeExtractor DEFAULT_METATYPE_EXTRACTOR = new DefaultMetatypeExtractor();
+
     private final AnnotationOverrider<?, ?>[] overriders;
 
     /**
-     * @param overriders in ascending priority (last runs last)
+     * @param overriders
+     *            in ascending priority (last runs last)
      */
     protected OverridingMetatypeExtractor(
             AnnotationOverrider<?, ?>... overriders) {
@@ -38,15 +45,15 @@ public abstract class OverridingMetatypeExtractor extends
     }
 
     @Override
-    public final Collection<Annotation> extractAnnotations(Annotation annotation) {
+    public final Collection<Annotation> extractAnnotations(A annotation) {
         // ensure a modifiable list:
         final ArrayList<Annotation> result = new ArrayList<Annotation>(
-                super.extractAnnotations(annotation));
+                DEFAULT_METATYPE_EXTRACTOR.extractAnnotations(annotation));
         final ListIterator<Annotation> iter = result.listIterator();
         while (iter.hasNext()) {
             Annotation toOverride = iter.next();
             Annotation overridden = override(toOverride, annotation);
-            if (ObjectUtils.notEqual(overridden, toOverride)) {
+            if (!AnnotationUtils.equals(overridden, toOverride)) {
                 iter.set(overridden);
             }
         }
@@ -54,12 +61,13 @@ public abstract class OverridingMetatypeExtractor extends
     }
 
     @SuppressWarnings("unchecked")
-    private <A extends Annotation, M extends Annotation> A override(A servant,
-            M master) {
-        A result = servant;
+    private <S extends Annotation> S override(S servant, A master) {
+        S result = servant;
         for (AnnotationOverrider<?, ?> overrider : overriders) {
-            if (overrider.supports(servant.annotationType(), master.annotationType())) {
-                result = ((AnnotationOverrider<A, M>) overrider).override(servant, master);
+            if (overrider.supports(servant.annotationType(),
+                    master.annotationType())) {
+                result = ((AnnotationOverrider<S, A>) overrider).override(
+                        servant, master);
             }
         }
         return result;
